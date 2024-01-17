@@ -1,0 +1,56 @@
+# name: CICD
+
+# on: 
+#   push:
+#     branches: [ cicd-docker-ec2 ]
+
+# jobs: 
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout source
+#         uses: actions/checkout@v3
+#       - name: fanetech FaneOff2022@.Com
+#         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+#       - name: Build the Docker image
+#         run: docker build -t integrationninjas/action-first .
+#       - name: Push the Docker image to the repository
+#         run: docker push integrationninjas/action-first:latest
+
+#   deploy:
+#     needs: build
+#     runs-on: win1-laptop
+
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: self-hosted
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm install
+    - run: |
+        touch .env
+        echo "${{ secrets.PORT}}" > .env
+    
